@@ -8,17 +8,36 @@ public class MainGameLogic : MonoBehaviour
     public Transform ball;
 
     private Transform correctCup;
+    public static MainGameLogic Instance;
+
+    void Awake()
+    {
+        Instance = this;
+    }
+
+
 
     void Start()
     {
         Debug.Log("Willkommen zum Becher-Spiel!");
         StartCoroutine(NewRound());
     }
+    
+     public void OnCorrectCupSelected(Cup cup)
+    {
+        Debug.Log(" Richtiger Cup ausgewaehlt: " + cup.name);
+    }
+
+    public void OnWrongCupSelected(Cup cup)
+    {
+        Debug.Log(" Falscher Cup: " + cup.name);
+    }
 
     IEnumerator NewRound()
     {
         // 1. Zufällig Cup bestimmen
         correctCup = cups[Random.Range(0, cups.Length)];
+        correctCup.GetComponent<Cup>().isCorrectCup = true;
         //float newBallX = correctCup.transform.parent.position.x + correctCup.position.x;
 
         ball.position = new Vector3(correctCup.position.x, ball.position.y, ball.position.z);
@@ -41,12 +60,11 @@ public class MainGameLogic : MonoBehaviour
 
         ball.parent = correctCup;
         // 2. Mischen
-        yield return StartCoroutine(shuffleCupsWithBall());
+        yield return StartCoroutine(shuffleCups());
         ball.parent = null;
-        // Jetzt wartet das Spiel auf Klick des Spielers
     }
 
-    IEnumerator shuffleCupsWithBall()
+    IEnumerator shuffleCups()
     {
         for (int i = 0; i < 6; i++)
         {
@@ -68,19 +86,6 @@ public class MainGameLogic : MonoBehaviour
         }
     }
 
-    public void CupSelected(Transform chosenCup)
-    {
-        if (chosenCup == correctCup)
-        {
-            Debug.Log("✅ Richtig!");
-        }
-        else
-        {
-            Debug.Log("❌ Falsch!");
-        }
-
-        StartCoroutine(NewRound());
-    }
 
     public IEnumerator MoveAllCupsDown(Transform[] cups, float amount, float duration)
 {
