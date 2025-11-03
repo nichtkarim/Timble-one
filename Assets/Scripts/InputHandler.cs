@@ -24,7 +24,6 @@ public class InputHandler : MonoBehaviour
             Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
-                // Versuche das IClickable Interface zu bekommen
                 IClickable clickable = hit.collider.GetComponent<IClickable>();
                 if (clickable != null)
                 {
