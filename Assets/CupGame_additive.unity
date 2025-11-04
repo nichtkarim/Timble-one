@@ -293,6 +293,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Cup
   cupName: Cup_2
+  isCorrectCup: 0
 --- !u!1 &946159695
 GameObject:
   m_ObjectHideFlags: 0
@@ -418,6 +419,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Cup
   cupName: Cup_3
+  isCorrectCup: 0
 --- !u!1 &1652934731
 GameObject:
   m_ObjectHideFlags: 0
@@ -648,6 +650,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Cup
   cupName: Cup_1
+  isCorrectCup: 0
 --- !u!1 &8895842207452404569
 GameObject:
   m_ObjectHideFlags: 0
