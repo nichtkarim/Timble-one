@@ -9,6 +9,7 @@ public class StartMenu : MonoBehaviour
 
     public void PlayGame() {
         SceneManager.LoadScene("SampleScene"); // Zielszene anpassen
+        SceneManager.LoadScene("CupGame_additive", LoadSceneMode.Additive); // UI-Szene laden
     }
 
     public void OpenOptions(bool open) {
