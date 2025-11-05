@@ -7,10 +7,15 @@ public class Cup : MonoBehaviour, IClickable
     public bool isCorrectCup = false; 
     public void OnClick()
     {
-        Debug.Log("Cup wurde geklickt: " + name);
-
-        // Wichtig:
-        MainGameLogic.Instance.OnCupSelected(this);
+        if (!MainGameLogic.PlayerCanClick)
+        {
+            return;
+        }
+        else
+        {
+            Debug.Log("Cup wurde geklickt: " + name);
+            MainGameLogic.Instance.OnCupSelected(this);
+        }
     }
 }
 

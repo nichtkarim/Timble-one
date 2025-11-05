@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 public class MainGameLogic : MonoBehaviour
 {
     public Transform[] cups;
+    private Vector3[] startPositions;
     public Transform ball;
 
     private Transform correctCup;
@@ -14,21 +15,40 @@ public class MainGameLogic : MonoBehaviour
     public HealthSystem Player = new HealthSystem(); 
     public HealthSystem Dealer = new HealthSystem();
     private TaskCompletionSource<Cup> clickTaskSource;
+    
+    public static bool PlayerCanClick = false;
 
     
     
     void Awake()
     {
         Instance = this;
+        startPositions = cups.Select(c => c.position).ToArray();
     }
 
 
     async void Start()
     {
         Debug.Log("Willkommen zum Becher-Spiel!");
-        await NewRoundAsync();
+        await GameLoop();
     }
 
+private async Task GameLoop()
+{
+        while (Player.getCurrentHealth() > 0 && Dealer.getCurrentHealth() > 0)
+        {
+            await NewRoundAsync();
+        }
+        if (Player.getCurrentHealth() <= 0)
+        {
+            Debug.Log("Der Dealer gewinnt!");
+        }
+        else
+        {
+            Debug.Log("Der Spieler gewinnt!");
+        }
+}
+    /*
     public void OnCorrectCupSelected(Cup cup)
     {
         Debug.Log(" Richtiger Cup ausgewaehlt: " + cup.name);
@@ -41,11 +61,24 @@ public class MainGameLogic : MonoBehaviour
 
         Player.takeDamage(1);
     }
+    */
     public void OnCupSelected(Cup cup)
-{
-    Debug.Log("CupSelected ausgelöst für: " + cup.name);
-    clickTaskSource?.TrySetResult(cup);
-}
+    {
+        if (cup.isCorrectCup)
+        {
+            Debug.Log(" Richtiger Cup ausgewaehlt: " + cup.name);
+            Dealer.takeDamage(1);
+        }
+        else
+        {
+            Debug.Log(" Falscher Cup: " + cup.name);
+
+            Player.takeDamage(1);
+        }
+
+        clickTaskSource?.TrySetResult(cup);
+
+    }
 
 
     private async Task NewRoundAsync()
@@ -59,31 +92,35 @@ public class MainGameLogic : MonoBehaviour
         ball.position = new Vector3(correctCup.position.x, ball.position.y, ball.position.z);
 
 
-        Debug.Log("Der ball hat koordinaten: " + ball.position);
-        Debug.Log("Der korrekte Cup hat " + correctCup.position);
+        //Debug.Log("Der ball hat koordinaten: " + ball.position);
+        //Debug.Log("Der korrekte Cup hat " + correctCup.position);
         //ball.SetPositionAndRotation(correctCup.position + Vector3.down * 0.3f, Quaternion.identity);       
-        Debug.Log("Der Ball ist unter dem Cup: " + correctCup.name);
+       // Debug.Log("Der Ball ist unter dem Cup: " + correctCup.name);
 
 
         await MoveAllCupsDown(cups, -0.4f, 0.7f);
 
         ball.parent = correctCup;
         // 2. Mischen
+        PlayerCanClick = false;
         await shuffleCups();
+        PlayerCanClick = true; 
         ball.parent = null;
 
         Cup chosenCup = await WaitForCupClick();
-        Debug.Log("Spieler hat ausegwaehlt");
-
-        if (chosenCup == correctCup)
+        if (chosenCup.isCorrectCup)
         {
-              Debug.Log("Richtiger Cup!");
+        await moveUpOrDown(chosenCup.transform, 0.4f, 0.5f);
         }
         else
         {
-         Debug.Log("Falscher Cup!");   
+            await moveUpOrDown(chosenCup.transform, 0.4f, 0.5f);
+        await moveUpOrDown(correctCup, 0.4f, 0.5f); 
         }
+       
+        
         Debug.Log("Auswahl erkannt → Runde vorbei");
+        ResetCupPositions();
     }
 
     async Task shuffleCups()
@@ -131,10 +168,19 @@ public class MainGameLogic : MonoBehaviour
         }
     }
 
- public Task<Cup> WaitForCupClick()
+    public Task<Cup> WaitForCupClick()
     {
         Debug.Log("Warte auf Becher-Auswahl...");
         clickTaskSource = new TaskCompletionSource<Cup>();
         return clickTaskSource.Task;
     }
+    
+    private void ResetCupPositions()
+{
+    for (int i = 0; i < cups.Length; i++)
+    {
+        cups[i].position = startPositions[i];
+        cups[i].GetComponent<Cup>().isCorrectCup = false;
+    }
+}
 }

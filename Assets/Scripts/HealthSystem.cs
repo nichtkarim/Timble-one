@@ -18,4 +18,8 @@ public class HealthSystem
             Debug.Log("Player/Dealer is dead!");
         }
     }
+    public int getCurrentHealth()
+    {
+        return currentHealth;
+    }
 }
