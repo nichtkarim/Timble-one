@@ -1,10 +1,10 @@
 using UnityEngine;
 using System;
 
-public class Cup : MonoBehaviour, IClickable
+public class Cup : MonoBehaviour, IClickable, IHoverable
 {
     public string cupName;
-    public bool isCorrectCup = false; 
+    public bool isCorrectCup = false;
     public void OnClick()
     {
         if (!MainGameLogic.PlayerCanClick)
@@ -15,6 +15,44 @@ public class Cup : MonoBehaviour, IClickable
         {
             Debug.Log("Cup wurde geklickt: " + name);
             MainGameLogic.Instance.OnCupSelected(this);
+        }
+    }
+     public void OnHoverEnter()
+    {
+         if (!MainGameLogic.PlayerCanClick)
+        {
+            return;
+        }
+        else
+        {
+            if (gameObject.GetComponent<Outline>() == null)
+            {
+                 var outline = gameObject.AddComponent<Outline>();
+            outline.OutlineMode = Outline.Mode.OutlineAll;
+            outline.OutlineColor = Color.white;
+            outline.OutlineWidth = 4f;
+            }
+            else
+            {
+                return;
+            }
+            
+        }
+     
+    }
+
+    public void OnHoverExit()
+    {
+        if (!MainGameLogic.PlayerCanClick)
+        {
+            return;
+        }
+        else
+        {
+            if (gameObject.GetComponent<Outline>() != null)
+            {
+                Destroy(gameObject.GetComponent<Outline>());
+            }
         }
     }
 }

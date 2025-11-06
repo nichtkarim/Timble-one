@@ -253,7 +253,7 @@ Transform:
   m_GameObject: {fileID: 382732295}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -0.73531723, y: 4.3, z: -6.3777466}
+  m_LocalPosition: {x: 0.36096954, y: 4.2999997, z: -6.3733597}
   m_LocalScale: {x: 8, y: 8, z: 8}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -379,7 +379,7 @@ Transform:
   m_GameObject: {fileID: 946159695}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 0.3005619, y: 4.3, z: -6.3736496}
+  m_LocalPosition: {x: -0.40747643, y: 4.2999997, z: -6.377632}
   m_LocalScale: {x: 8, y: 8, z: 8}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -445,7 +445,7 @@ Transform:
   m_GameObject: {fileID: 1652934731}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 30.12966, y: 0.4, z: -120.28008}
+  m_LocalPosition: {x: 30.12966, y: 0, z: -120.28008}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -527,7 +527,7 @@ Transform:
   m_GameObject: {fileID: 7777807765525550923}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -0.237, y: 4.3, z: -6.377434}
+  m_LocalPosition: {x: -0.8906021, y: 4.2999997, z: -6.377838}
   m_LocalScale: {x: 8, y: 8, z: 8}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -546,6 +546,7 @@ GameObject:
   - component: {fileID: 8138196410593146526}
   - component: {fileID: 8138196410593146527}
   - component: {fileID: 8138196410593146528}
+  - component: {fileID: 8138196410593146529}
   m_Layer: 0
   m_Name: Cup_1
   m_TagString: Clickable
@@ -562,8 +563,8 @@ Transform:
   m_GameObject: {fileID: 8895842207452404569}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071069, y: -0, z: -0, w: 0.70710677}
-  m_LocalPosition: {x: 29.885, y: 4.2554836, z: -126.662}
-  m_LocalScale: {x: 2, y: 2.0000007, z: 2.0000007}
+  m_LocalPosition: {x: 29.230507, y: 4.248, z: -126.65384}
+  m_LocalScale: {x: 2, y: 2.0000002, z: 2.0000002}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -651,6 +652,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Cup
   cupName: Cup_1
   isCorrectCup: 0
+--- !u!114 &8138196410593146529
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7777807765525550923}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fea29bb7c508c244a1f805a5fd3fc4d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Outline
+  outlineMode: 0
+  outlineColor: {r: 1, g: 1, b: 1, a: 1}
+  outlineWidth: 2
+  precomputeOutline: 0
+  bakeKeys: []
+  bakeValues: []
 --- !u!1 &8895842207452404569
 GameObject:
   m_ObjectHideFlags: 0
