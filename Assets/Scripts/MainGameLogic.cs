@@ -37,6 +37,11 @@ private async Task GameLoop()
 {
         while (Player.getCurrentHealth() > 0 && Dealer.getCurrentHealth() > 0)
         {
+             // 🪄 Neue Runde vorbereiten
+        InventorySystem.Instance.RefillSlots();
+
+        // Hier kannst du z. B. warten, bis Spieler Items auswählt
+            await WaitForItemUsePhase();
             await NewRoundAsync();
         }
         if (Player.getCurrentHealth() <= 0)
@@ -101,7 +106,7 @@ private async Task GameLoop()
         await MoveAllCupsDown(cups, -0.4f, 0.7f);
 
         ball.parent = correctCup;
-        // 2. Mischen
+      
         PlayerCanClick = false;
         await shuffleCups();
         PlayerCanClick = true; 
@@ -174,13 +179,27 @@ private async Task GameLoop()
         clickTaskSource = new TaskCompletionSource<Cup>();
         return clickTaskSource.Task;
     }
-    
+
     private void ResetCupPositions()
-{
-    for (int i = 0; i < cups.Length; i++)
     {
-        cups[i].position = startPositions[i];
-        cups[i].GetComponent<Cup>().isCorrectCup = false;
+        for (int i = 0; i < cups.Length; i++)
+        {
+            cups[i].position = startPositions[i];
+            cups[i].GetComponent<Cup>().isCorrectCup = false;
+        }
     }
+async Task WaitForItemUsePhase()
+{
+    Debug.Log("Item-Phase gestartet! Klicke auf Items um sie zu benutzen...");
+
+  
+    float timer = 3f;
+    while (timer > 0)
+    {
+        timer -= Time.deltaTime;
+        await Task.Yield();
+    }
+
+    Debug.Log("Item-Phase beendet!");
 }
 }
