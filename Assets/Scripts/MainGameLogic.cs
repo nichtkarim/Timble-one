@@ -41,7 +41,7 @@ private async Task GameLoop()
         InventorySystem.Instance.RefillSlots();
 
         // Hier kannst du z. B. warten, bis Spieler Items auswählt
-            await WaitForItemUsePhase();
+           await WaitForItemUsePhase();
             await NewRoundAsync();
         }
         if (Player.getCurrentHealth() <= 0)

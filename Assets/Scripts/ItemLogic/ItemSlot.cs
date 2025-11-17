@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class ItemSlot : MonoBehaviour, IClickable
+public class ItemSlot : MonoBehaviour, IClickable, IHoverable
 {
     public GameItem currentItem;
     private GameObject visualInstance;
@@ -128,5 +128,44 @@ public class ItemSlot : MonoBehaviour, IClickable
         ClearSlot();
 
         InventorySystem.Instance.OnItemUsed();
+    }
+
+    public void OnHoverEnter()
+    {
+         if (!MainGameLogic.PlayerCanClick)
+        {
+            return;
+        }
+        else
+        {
+            if (gameObject.GetComponent<Outline>() == null)
+            {
+                 var outline = gameObject.AddComponent<Outline>();
+            outline.OutlineMode = Outline.Mode.OutlineAll;
+            outline.OutlineColor = Color.white;
+            outline.OutlineWidth = 4f;
+            }
+            else
+            {
+                return;
+            }
+            
+        }
+     
+    }
+
+    public void OnHoverExit()
+    {
+        if (!MainGameLogic.PlayerCanClick)
+        {
+            return;
+        }
+        else
+        {
+            if (gameObject.GetComponent<Outline>() != null)
+            {
+                Destroy(gameObject.GetComponent<Outline>());
+            }
+        }
     }
 }

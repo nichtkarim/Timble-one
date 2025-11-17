@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [System.Serializable]
-public class HealItem : GameItem, IHoverable
+public class HealItem : GameItem
 {
     public string itemName;
     public Sprite icon;
