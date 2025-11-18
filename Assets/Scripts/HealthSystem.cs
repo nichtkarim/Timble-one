@@ -22,4 +22,12 @@ public class HealthSystem
     {
         return currentHealth;
     }
+    public void setCurrentHealth(int health)
+    {
+        currentHealth = health;
+    }
+    public int getMaxHealth()
+    {
+        return maxHealth;
+    }
 }

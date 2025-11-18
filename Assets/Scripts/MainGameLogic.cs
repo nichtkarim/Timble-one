@@ -17,7 +17,9 @@ public class MainGameLogic : MonoBehaviour
     private TaskCompletionSource<Cup> clickTaskSource;
     
     public static bool PlayerCanClick = false;
-
+    [SerializeField] private float baseShuffleSpeed = 2f;
+    [HideInInspector] public float roundBasedModifier = 1f;
+    [SerializeField] private float speedIncreasePerRound = 0.2f;
     
     
     void Awake()
@@ -43,6 +45,8 @@ private async Task GameLoop()
         // Hier kannst du z. B. warten, bis Spieler Items auswählt
            await WaitForItemUsePhase();
             await NewRoundAsync();
+            baseShuffleSpeed += speedIncreasePerRound;
+            roundBasedModifier = 1f;
         }
         if (Player.getCurrentHealth() <= 0)
         {
@@ -122,33 +126,34 @@ private async Task GameLoop()
             await moveUpOrDown(chosenCup.transform, 0.4f, 0.5f);
         await moveUpOrDown(correctCup, 0.4f, 0.5f); 
         }
-       
-        
+
         Debug.Log("Auswahl erkannt → Runde vorbei");
         ResetCupPositions();
     }
 
-    async Task shuffleCups()
+async Task shuffleCups()
+{
+   
+
+    for (int i = 0; i < 6; i++)
     {
-        for (int i = 0; i < 6; i++)
+        Transform cupA = cups[Random.Range(0, cups.Length)];
+        Transform cupB = cups[Random.Range(0, cups.Length)];
+
+        Vector3 posA = cupA.position;
+        Vector3 posB = cupB.position;
+
+        float t = 0;
+        while (t < 1)
         {
-            Transform cupA = cups[Random.Range(0, cups.Length)];
-            Transform cupB = cups[Random.Range(0, cups.Length)];
-
-            Vector3 posA = cupA.position;
-            Vector3 posB = cupB.position;
-
-            float t = 0;
-            while (t < 1)
-            {
-
-                cupA.position = Vector3.Lerp(posA, posB, t);
-                cupB.position = Vector3.Lerp(posB, posA, t);
-                t += Time.deltaTime * 2;
-                await Task.Yield();
-            }
+            cupA.position = Vector3.Lerp(posA, posB, t);
+            cupB.position = Vector3.Lerp(posB, posA, t);
+          
+            t += Time.deltaTime * baseShuffleSpeed * roundBasedModifier; 
+            await Task.Yield();
         }
     }
+}
 
 
     public async Task MoveAllCupsDown(Transform[] cups, float amount, float duration)

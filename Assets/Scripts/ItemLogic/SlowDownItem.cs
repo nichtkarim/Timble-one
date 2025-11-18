@@ -2,7 +2,7 @@ using Unity.Mathematics;
 using UnityEngine;
 
 [System.Serializable]
-public class HealItem : GameItem
+public class SlowDownItem : GameItem
 {
     public string itemName;
     public Sprite icon;
@@ -17,15 +17,10 @@ public class HealItem : GameItem
         // Heile den Spieler
         if (MainGameLogic.Instance != null && MainGameLogic.Instance.Player != null)
         {
-            int healthBefore = MainGameLogic.Instance.Player.getCurrentHealth();
-            if(healthBefore >= MainGameLogic.Instance.Player.getMaxHealth())
-            {
-                Debug.Log("Gesundheit ist bereits voll. Heilung nicht möglich.");
-                return;
-            }
+    
     
             
-            MainGameLogic.Instance.Player.setCurrentHealth(healthBefore + 1);
+            MainGameLogic.Instance.roundBasedModifier = 0.1f;
         }
         else
         {

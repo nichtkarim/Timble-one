@@ -7,7 +7,7 @@ public class InventorySystem : MonoBehaviour
 
     public ItemSlot[] slots; // 4 Slot GameObjects in der Szene
     public GameObject healItemPrefab;
-    public GameObject shieldItemPrefab;
+    public GameObject slowDownItemPrefab;
 
     private bool isInitialized = false;
 
@@ -88,7 +88,7 @@ public class InventorySystem : MonoBehaviour
 
     private GameItem GenerateRandomItem()
     {
-        if (healItemPrefab == null || shieldItemPrefab == null)
+        if (healItemPrefab == null || slowDownItemPrefab == null)
         {
             Debug.LogError("Item Prefabs sind nicht zugewiesen im Inspector!");
             return null;
@@ -102,17 +102,17 @@ public class InventorySystem : MonoBehaviour
             { 
                 itemName = "Heiltrank", 
                 itemPrefab = healItemPrefab,
-                description = "Heilt 50 HP",
+                description = "Heilt um 1 Lebenspunkt",
             };
         }
         else
         {
-            Debug.Log("Generiere Schutz-Amulett");
-            return new GameItem 
+            Debug.Log("Generiere VerlangsamungsItems");
+            return new SlowDownItem 
             { 
-                itemName = "Schutz-Amulett", 
-                itemPrefab = shieldItemPrefab,
-                description = "Gewährt Schutz"
+                itemName = "VerlangsamungsItem", 
+                itemPrefab = slowDownItemPrefab,
+                description = "Verlangsamt um 30 Prozent für die nächste Runde",
             };
         }
     }

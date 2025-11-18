@@ -103,6 +103,14 @@ public class ItemSlot : MonoBehaviour, IClickable, IHoverable
         if (visualInstance != null)
         {
             Debug.Log($"Lösche Item aus Slot {slotIndex}");
+            
+            // Entferne Outline BEVOR das Objekt zerstört wird
+            var outline = visualInstance.GetComponent<Outline>();
+            if (outline != null)
+            {
+                Destroy(outline);
+            }
+            
             Destroy(visualInstance);
         }
 
