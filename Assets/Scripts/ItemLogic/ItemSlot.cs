@@ -132,6 +132,14 @@ public class ItemSlot : MonoBehaviour, IClickable, IHoverable
         }
 
         Debug.Log($"Item {currentItem.itemName} in Slot {slotIndex} benutzt.");
+        
+        // Visuelles Feedback beim Item-Klick
+        if (VisualFeedbackManager.Instance != null)
+        {
+            VisualFeedbackManager.Instance.PlayItemUseEffect(transform.position);
+            VisualFeedbackManager.Instance.PulseObject(transform, 1.3f, 0.2f);
+        }
+        
         currentItem.Use();
         ClearSlot();
 

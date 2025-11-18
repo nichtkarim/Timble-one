@@ -1,0 +1,160 @@
+═══════════════════════════════════════════════════════════════
+    ANLEITUNG: FIRST-PERSON SPIELER MIT ARMEN EINRICHTEN
+═══════════════════════════════════════════════════════════════
+
+SCHRITT 1: Player GameObject erstellen
+───────────────────────────────────────────────────────────────
+1. Rechtsklick in der Hierarchy → 3D Object → Capsule
+2. Umbenennen in "Player"
+3. Position auf (0, 1, 0) setzen
+4. Tag auf "Player" setzen
+
+SCHRITT 2: Character Controller hinzufügen
+───────────────────────────────────────────────────────────────
+1. Player auswählen
+2. Add Component → Character Controller
+3. Einstellungen:
+   - Height: 2
+   - Radius: 0.5
+   - Center: (0, 0, 0)
+
+SCHRITT 3: FirstPersonController Script hinzufügen
+───────────────────────────────────────────────────────────────
+1. Player auswählen
+2. Add Component → FirstPersonController
+3. Einstellungen anpassen nach Belieben:
+   - Walk Speed: 5
+   - Sprint Speed: 8
+   - Look Sensitivity: 2
+
+SCHRITT 4: Kamera einrichten
+───────────────────────────────────────────────────────────────
+1. Rechtsklick auf Player → Create Empty
+2. Umbenennen in "CameraHolder"
+3. Position: (0, 0.6, 0) - Auf Augenhöhe
+4. Main Camera als Child von CameraHolder ziehen
+5. Main Camera Position auf (0, 0, 0) setzen
+6. Main Camera Rotation auf (0, 0, 0) setzen
+7. Im FirstPersonController Script: CameraHolder zu "Camera Transform" zuweisen
+
+SCHRITT 5: Arme einrichten
+───────────────────────────────────────────────────────────────
+OPTION A - Einfache Platzhalter-Arme:
+   1. Rechtsklick auf CameraHolder → 3D Object → Cube
+   2. Umbenennen in "LeftArm"
+   3. Position: (-0.3, -0.3, 0.4)
+   4. Scale: (0.1, 0.4, 0.1)
+   
+   5. Rechtsklick auf CameraHolder → 3D Object → Cube
+   6. Umbenennen in "RightArm"
+   7. Position: (0.3, -0.3, 0.4)
+   8. Scale: (0.1, 0.4, 0.1)
+   
+   9. Create Empty unter CameraHolder
+   10. Umbenennen in "Arms"
+   11. LeftArm und RightArm als Children von Arms ziehen
+   12. Position von Arms: (0, 0, 0)
+
+OPTION B - Eigenes Arm-Model verwenden:
+   1. Dein Arm-Model in die Szene ziehen
+   2. Als Child von CameraHolder setzen
+   3. Position und Scale anpassen bis es gut aussieht
+   4. Ungefähr bei Position: (0, -0.3, 0.3)
+
+SCHRITT 6: Layer für Arme einrichten (WICHTIG!)
+───────────────────────────────────────────────────────────────
+1. Edit → Project Settings → Tags and Layers
+2. Einen freien User Layer auswählen (z.B. Layer 8)
+3. Benennen als "Arms"
+4. Arms GameObject und alle Children auf Layer "Arms" setzen
+5. Main Camera auswählen
+6. Inspector → Culling Mask → Alles außer "Arms" deaktivieren
+
+WICHTIG: Für Arme separate Kamera erstellen!
+───────────────────────────────────────────────────────────────
+1. Rechtsklick auf CameraHolder → Camera
+2. Umbenennen in "ArmsCamera"
+3. Einstellungen:
+   - Clear Flags: Depth Only
+   - Culling Mask: Nur "Arms" aktiviert
+   - Depth: 1 (höher als Main Camera)
+   - Field of View: Gleich wie Main Camera (normalerweise 60)
+
+SCHRITT 7: Arms Animation hinzufügen (Optional)
+───────────────────────────────────────────────────────────────
+1. Arms GameObject auswählen
+2. Add Component → ArmsAnimationController
+3. Einstellungen nach Belieben anpassen
+
+SCHRITT 8: FirstPersonController Script konfigurieren
+───────────────────────────────────────────────────────────────
+1. Player GameObject auswählen
+2. Im FirstPersonController Component:
+   - Camera Transform: CameraHolder zuweisen
+   - Arms Transform: Arms GameObject zuweisen
+
+SCHRITT 9: Capsule Renderer deaktivieren (Optional)
+───────────────────────────────────────────────────────────────
+Damit du die Capsule nicht siehst:
+1. Player auswählen
+2. Mesh Renderer Component deaktivieren (Häkchen entfernen)
+
+SCHRITT 10: Input Handler anpassen
+───────────────────────────────────────────────────────────────
+Der vorhandene InputHandler verwendet Camera.main für Raycast.
+Das funktioniert weiterhin, da die Main Camera jetzt am Player ist!
+
+═══════════════════════════════════════════════════════════════
+                    STEUERUNG
+═══════════════════════════════════════════════════════════════
+W, A, S, D    - Bewegung
+Linke Shift   - Sprint
+Leertaste     - Springen
+Maus          - Umsehen
+ESC           - Cursor freigeben
+Linke Maustaste (wenn Cursor frei) - Cursor wieder sperren
+
+═══════════════════════════════════════════════════════════════
+                    TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════
+
+Problem: Arme clippen durch Wände
+Lösung: Arme näher an die Kamera positionieren (Z-Position reduzieren)
+
+Problem: Arme sind zu groß/klein
+Lösung: Scale der Arms GameObject anpassen
+
+Problem: Bewegung fühlt sich komisch an
+Lösung: Walk Speed und Sprint Speed im FirstPersonController anpassen
+
+Problem: Maus zu schnell/langsam
+Lösung: Look Sensitivity im FirstPersonController anpassen
+
+Problem: Arme sind nicht sichtbar
+Lösung: Prüfen ob ArmsCamera korrekt eingerichtet ist und Depth höher ist
+
+Problem: Ich sehe durch den Boden
+Lösung: Player Position Y auf mindestens 1 setzen
+
+═══════════════════════════════════════════════════════════════
+                FORTGESCHRITTENE OPTIONEN
+═══════════════════════════════════════════════════════════════
+
+Eigene Arme aus deinem Model verwenden:
+1. Gehe zu Assets/Simple_Character_PSX oder MrRobotModelsFiles
+2. Suche nach Arm-Meshes im Model
+3. Extrahiere nur die Arme (eventuell in Blender)
+4. Importiere als separates Arm-Model
+5. Folge OPTION B von SCHRITT 5
+
+Animationen hinzufügen:
+1. Erstelle Animator Controller für Arms
+2. Füge Idle, Walk, Run Animationen hinzu
+3. Verbinde mit CharacterController Velocity
+
+Waffen hinzufügen:
+1. Erstelle Weapon-Objekt als Child von Arms
+2. Positioniere in der rechten Hand
+3. Erweitere ArmsAnimationController für Waffen-Swap
+
+═══════════════════════════════════════════════════════════════

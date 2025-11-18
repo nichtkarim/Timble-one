@@ -76,11 +76,34 @@ private async Task GameLoop()
         if (cup.isCorrectCup)
         {
             Debug.Log(" Richtiger Cup ausgewaehlt: " + cup.name);
+            
+            // Visuelles Feedback für richtigen Cup
+            if (VisualFeedbackManager.Instance != null)
+            {
+                Debug.Log("✅ VisualFeedbackManager gefunden, triggere Feedback...");
+                VisualFeedbackManager.Instance.TriggerCorrectCupFeedback(cup.transform.position, cup.transform);
+            }
+            else
+            {
+                Debug.LogError("❌ VisualFeedbackManager.Instance ist NULL! Hast du das GameObject in der Szene?");
+            }
+            
             Dealer.takeDamage(1);
         }
         else
         {
             Debug.Log(" Falscher Cup: " + cup.name);
+            
+            // Visuelles Feedback für falschen Cup
+            if (VisualFeedbackManager.Instance != null)
+            {
+                Debug.Log("✅ VisualFeedbackManager gefunden, triggere Feedback...");
+                VisualFeedbackManager.Instance.TriggerWrongCupFeedback(cup.transform.position, cup.transform);
+            }
+            else
+            {
+                Debug.LogError("❌ VisualFeedbackManager.Instance ist NULL! Hast du das GameObject in der Szene?");
+            }
 
             Player.takeDamage(1);
         }
