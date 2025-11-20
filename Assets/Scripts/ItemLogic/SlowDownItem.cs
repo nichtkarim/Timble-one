@@ -14,13 +14,18 @@ public class SlowDownItem : GameItem
     {
       
         
-        // Heile den Spieler
+        // Verlangsamung aktivieren
         if (MainGameLogic.Instance != null && MainGameLogic.Instance.Player != null)
         {
-    
-    
+            MainGameLogic.Instance.roundBasedModifier = 0.5f;
             
-            MainGameLogic.Instance.roundBasedModifier = 0.1f;
+            // Visuelles Feedback für Item-Nutzung
+            if (VisualFeedbackManager.Instance != null && Camera.main != null)
+            {
+                Vector3 feedbackPos = Camera.main.transform.position + Camera.main.transform.forward * 2f;
+                VisualFeedbackManager.Instance.PlayItemUseEffect(feedbackPos);
+                VisualFeedbackManager.Instance.TriggerSlowMotion(0.5f, 0.3f);
+            }
         }
         else
         {
