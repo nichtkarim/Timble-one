@@ -2,13 +2,13 @@ using Unity.Mathematics;
 using UnityEngine;
 
 [System.Serializable]
-public class HealItem : GameItem
+public class IntuitionItem : GameItem
 {
     public string itemName;
     public Sprite icon;
     public string description;
-   
 
+   
     // Beispiel: Item-Effekt ausführen
     
     public override void Use()

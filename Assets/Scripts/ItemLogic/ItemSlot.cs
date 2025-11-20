@@ -77,25 +77,13 @@ public class ItemSlot : MonoBehaviour, IClickable, IHoverable
         // Größe des Slots (BoxCollider)
         Vector3 slotSize = slotCollider.bounds.size;
         
-        // Größe des Items
-        /*
-       / Vector3 itemSize = itemBounds.size;
-        
-        // Berechne Skalierungsfaktoren für jede Achse
-        float scaleX = slotSize.x / itemSize.x;
-        float scaleY = slotSize.y / itemSize.y;
-        float scaleZ = slotSize.z / itemSize.z;
-        
-        // Nimm den kleinsten Faktor, damit das Item in alle Richtungen passt
-        float scaleFactor = Mathf.Min(scaleX, scaleY, scaleZ);
-        
-        // Optional: Lass etwas Luft (80% der maximalen Größe)
-        scaleFactor *= 0.8f;
-        
-        // Wende die Skalierung an
-        visualInstance.transform.localScale = Vector3.one * scaleFactor;
-        */
-        //Debug.Log($"Item {currentItem.itemName} skaliert mit Faktor {scaleFactor}");
+        // Optional: Automatische Skalierung (auskommentiert)
+        // Vector3 itemSize = itemBounds.size;
+        // float scaleX = slotSize.x / itemSize.x;
+        // float scaleY = slotSize.y / itemSize.y;
+        // float scaleZ = slotSize.z / itemSize.z;
+        // float scaleFactor = Mathf.Min(scaleX, scaleY, scaleZ) * 0.8f;
+        // visualInstance.transform.localScale = Vector3.one * scaleFactor;
     }
 
     public void ClearSlot()
@@ -119,17 +107,8 @@ public class ItemSlot : MonoBehaviour, IClickable, IHoverable
 
     public void OnClick()
     {
-        if (!MainGameLogic.PlayerCanClick)
-        {
-            Debug.Log("Spieler kann momentan nicht klicken");
-            return;
-        }
-        
-        if (currentItem == null)
-        {
-            Debug.Log($"Slot {slotIndex} ist leer");
-            return;
-        }
+        if (!MainGameLogic.PlayerCanClick) return;
+        if (currentItem == null) return;
 
         Debug.Log($"Item {currentItem.itemName} in Slot {slotIndex} benutzt.");
         currentItem.Use();
@@ -140,40 +119,40 @@ public class ItemSlot : MonoBehaviour, IClickable, IHoverable
 
     public void OnHoverEnter()
     {
-         if (!MainGameLogic.PlayerCanClick)
+        if (!MainGameLogic.PlayerCanClick) return;
+        if (currentItem == null) return;
+
+        // Zeige Tooltip
+        if (TooltipSystem.Instance != null)
         {
-            return;
+            TooltipSystem.Instance.ShowTooltip(currentItem.itemName, currentItem.description);
         }
-        else
+
+        // Füge Outline zum Slot hinzu
+        if (gameObject.GetComponent<Outline>() == null)
         {
-            if (gameObject.GetComponent<Outline>() == null)
-            {
-                 var outline = gameObject.AddComponent<Outline>();
+            var outline = gameObject.AddComponent<Outline>();
             outline.OutlineMode = Outline.Mode.OutlineAll;
-            outline.OutlineColor = Color.white;
+            outline.OutlineColor = Color.yellow;
             outline.OutlineWidth = 4f;
-            }
-            else
-            {
-                return;
-            }
-            
         }
-     
     }
 
     public void OnHoverExit()
     {
-        if (!MainGameLogic.PlayerCanClick)
+        if (!MainGameLogic.PlayerCanClick) return;
+
+        // Verstecke Tooltip
+        if (TooltipSystem.Instance != null)
         {
-            return;
+            TooltipSystem.Instance.HideTooltip();
         }
-        else
+
+        // Entferne Outline vom Slot
+        var outline = gameObject.GetComponent<Outline>();
+        if (outline != null)
         {
-            if (gameObject.GetComponent<Outline>() != null)
-            {
-                Destroy(gameObject.GetComponent<Outline>());
-            }
+            Destroy(outline);
         }
     }
 }

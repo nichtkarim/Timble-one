@@ -4,6 +4,7 @@ using System.Linq;
 using Unity.VisualScripting;
 using System.Threading.Tasks;
 
+
 public class MainGameLogic : MonoBehaviour
 {
     public Transform[] cups;
@@ -13,6 +14,7 @@ public class MainGameLogic : MonoBehaviour
     private Transform correctCup;
     public static MainGameLogic Instance;
     public HealthSystem Player = new HealthSystem(); 
+    public IntuitionSystem Intuition = new IntuitionSystem();
     public HealthSystem Dealer = new HealthSystem();
     private TaskCompletionSource<Cup> clickTaskSource;
     

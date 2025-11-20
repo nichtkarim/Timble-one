@@ -8,6 +8,9 @@ public class InventorySystem : MonoBehaviour
     public ItemSlot[] slots; // 4 Slot GameObjects in der Szene
     public GameObject healItemPrefab;
     public GameObject slowDownItemPrefab;
+    public GameObject IntuitionItemPrefab;
+
+
 
     private bool isInitialized = false;
 
@@ -94,15 +97,25 @@ public class InventorySystem : MonoBehaviour
             return null;
         }
 
-        int r = Random.Range(0, 2);
+        int r = Random.Range(0, 3);
         if (r == 0)
         {
             Debug.Log("Generiere Heiltrank");
-            return new HealItem 
+            HealItem x = new HealItem();
+            x.itemName = "Heiltrank";
+            x.itemPrefab = healItemPrefab;
+            x.description = "Heilt um 1 Lebenspunkt";
+            
+            return x;
+        }
+        else if( r == 1)
+        {
+            Debug.Log("Generiere regen Intuition Item");
+            return new IntuitionItem 
             { 
-                itemName = "Heiltrank", 
-                itemPrefab = healItemPrefab,
-                description = "Heilt um 1 Lebenspunkt",
+                itemName = "IntuitionsItem", 
+                itemPrefab = IntuitionItemPrefab,
+                description = "Erhöht die Intuition für die nächste Runde",
             };
         }
         else
