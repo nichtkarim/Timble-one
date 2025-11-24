@@ -10,15 +10,16 @@ public class IntuitionSystem : MonoBehaviour
     [SerializeField] private int currentIntuition; // Jetzt im Inspector sichtbar!
     
     [Header("Ball Removal")]
-    public float ballRemovalBaseChance = 0.1f; // 10% Basis-Chance
+    public float ballRemovalChance = 0.25f; // 25% Chance dass Dealer schummelt
     
     [Header("Tip System")]
     private int tipCupIndex = -1;
     private bool hasReceivedTip = false;
+    private bool dealerCheatedThisRound = false; // Wurde Ball entfernt?
     
     [Header("Intuition Loss")]
     public float intuitionLossPerSecond = 1f; // 1% pro Sekunde
-    public int intuitionLossOnWrongCup = 5; // 5% bei falscher Cup-Auswahl
+    public int intuitionLossOnWrongCup = 5; // 3% bei falscher Cup-Auswahl
     public int intuitionLossOnWrongBluff = 20; // Bei falschem Bluff
 
     [Header("UI References")]
@@ -110,33 +111,35 @@ public class IntuitionSystem : MonoBehaviour
     // === BALL REMOVAL (VOR DEM MISCHEN) ===
     
     /// <summary>
-    /// Entscheidet ob Ball entfernt wird BEVOR gemischt wird.
-    /// Höhere Intuition = niedrigere Chance dass Ball entfernt wird
+    /// Entscheidet ob Dealer schummelt und Ball entfernt (25% Chance)
+    /// UNABHÄNGIG von Intuition!
     /// </summary>
     public bool ShouldRemoveBall()
     {
-        // Bei 100% Intuition: 0% Chance
-        // Bei 0% Intuition: 10% Chance
-        float intuitionFactor = 1f - GetIntuitionAsFloat();
-        float removalChance = ballRemovalBaseChance * intuitionFactor;
+        // Feste 25% Chance
+        dealerCheatedThisRound = Random.value < ballRemovalChance;
         
-        bool shouldRemove = Random.value < removalChance;
+        Debug.Log($"🎲 Dealer schummelt? {dealerCheatedThisRound} (Chance: {ballRemovalChance * 100f}%)");
         
-        Debug.Log($"🎲 Ball entfernen? {shouldRemove} (Chance: {removalChance * 100f:F1}%, Intuition: {currentIntuition}%)");
-        
-        return shouldRemove;
+        return dealerCheatedThisRound;
     }
 
     // === TIP SYSTEM (NACH DEM MISCHEN) ===
     
     /// <summary>
-    /// Gibt dem Spieler einen Tipp basierend auf Intuition.
-    /// Höhere Intuition = höhere Chance auf Tipp
+    /// Gibt dem Spieler einen Tipp OB DEALER GESCHUMMELT HAT.
+    /// Höhere Intuition = höhere Chance den Betrug zu erkennen
     /// </summary>
-    public void GiveTipToPlayer(int correctCupIndex)
+    public void GiveCheatingTip()
     {
-        tipCupIndex = -1;
         hasReceivedTip = false;
+        
+        // Nur Tipp geben wenn Dealer TATSÄCHLICH geschummelt hat
+        if (!dealerCheatedThisRound)
+        {
+            Debug.Log("✅ Dealer hat NICHT geschummelt - kein Tipp nötig");
+            return;
+        }
         
         float intuition = GetIntuitionAsFloat();
         
@@ -144,84 +147,64 @@ public class IntuitionSystem : MonoBehaviour
         // Bei 30% Intuition = 30% Tipp-Chance
         if (Random.value < intuition)
         {
-            tipCupIndex = correctCupIndex;
             hasReceivedTip = true;
             
-            Debug.Log($"💡 Tipp erhalten! Richtige Tasse: {correctCupIndex + 1} (Intuition: {currentIntuition}%)");
+            Debug.Log($"💡 TIPP ERHALTEN! Dealer hat geschummelt! (Intuition: {currentIntuition}%)");
             
-            // Visuelles Feedback
-            ShowTipEffect();
+            // Visuelles Feedback - Cyan Flash
+            ShowCheatingTipEffect();
         }
         else
         {
-            Debug.Log($"❌ Kein Tipp (Intuition: {currentIntuition}% war zu niedrig)");
+            Debug.Log($"❌ Kein Tipp (Intuition: {currentIntuition}% war zu niedrig - Dealer hat geschummelt aber Spieler merkt es nicht)");
         }
     }
     
-    public bool HasTip()
+    /// <summary>
+    /// Prüft ob Spieler einen Tipp über Betrug bekommen hat
+    /// </summary>
+    public bool HasCheatingTip()
     {
         return hasReceivedTip;
     }
     
-    public int GetTipCupIndex()
+    /// <summary>
+    /// Wurde der Ball diese Runde entfernt?
+    /// </summary>
+    public bool DealerCheatedThisRound()
     {
-        return tipCupIndex;
+        return dealerCheatedThisRound;
     }
     
-    private void ShowTipEffect()
+    private void ShowCheatingTipEffect()
     {
-        // Flashscreen in Cyan = Tipp erhalten
+        // Cyan Flashscreen = Dealer hat geschummelt!
         if (VisualFeedbackManager.Instance != null)
         {
-            VisualFeedbackManager.Instance.FlashScreen(Color.cyan, 0.3f, 0.2f);
+            VisualFeedbackManager.Instance.FlashScreen(Color.cyan, 0.5f, 0.3f);
         }
     }
 
     // === BLUFF SYSTEM ===
     
     /// <summary>
-    /// Spieler wählt Becher OHNE Tipp zu haben - zeigt "Bluff callen" Button
+    /// Spieler callt Bluff - behauptet Dealer hat geschummelt
     /// </summary>
-    public bool CanCallBluff()
+    public void CallBluff(out bool bluffWasCorrect)
     {
-        return hasReceivedTip;
-    }
-    
-    /// <summary>
-    /// Spieler callt Bluff - Ball ist NICHT in der angegebenen Tasse
-    /// </summary>
-    public void CallBluff(int selectedCupIndex, bool ballWasInCup)
-    {
-        if (!hasReceivedTip)
-        {
-            Debug.LogWarning("⚠️ Kann nicht bluffen ohne Tipp!");
-            return;
-        }
-        
-        // Bluff ist richtig wenn Ball NICHT in der Tasse war
-        bool bluffWasCorrect = !ballWasInCup;
+        bluffWasCorrect = dealerCheatedThisRound;
         
         if (bluffWasCorrect)
         {
-            Debug.Log("✅ BLUFF RICHTIG! Dealer hat keinen Ball in der Tasse → Dealer verliert Leben");
-            // TODO: Dealer Leben abziehen
+            Debug.Log("✅ BLUFF RICHTIG! Dealer HAT geschummelt!");
         }
         else
         {
-            Debug.Log("❌ BLUFF FALSCH! Ball war doch in der Tasse → Spieler verliert Leben + Intuition");
+            Debug.Log("❌ BLUFF FALSCH! Dealer hat NICHT geschummelt - Ball war im Spiel!");
             
-            // Spieler verliert Leben
-            if (MainGameLogic.Instance?.Player != null)
-            {
-                int hp = MainGameLogic.Instance.Player.getCurrentHealth();
-                MainGameLogic.Instance.Player.setCurrentHealth(hp - 1);
-            }
-            
-            // Große Intuition-Strafe
+            // Intuition-Strafe nur bei falschem Bluff
             setCurrentIntuition(intuitionLossOnWrongBluff);
         }
-        
-        ResetTip();
     }
 
     // === ROUND MANAGEMENT ===
@@ -241,6 +224,7 @@ public class IntuitionSystem : MonoBehaviour
     public void OnRoundEnd()
     {
         ResetTip();
+        dealerCheatedThisRound = false; // Reset für nächste Runde
         // Kein Extra-Verlust mehr hier - läuft kontinuierlich über Update()
     }
     
