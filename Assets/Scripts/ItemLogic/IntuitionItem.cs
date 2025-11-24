@@ -10,24 +10,24 @@ public class IntuitionItem : GameItem
     
     public override void Use()
     {
-      
+        Debug.Log($"{itemName} wird benutzt!");
         
-        // Heile den Spieler
-        if (MainGameLogic.Instance != null && MainGameLogic.Instance.Player != null)
+        // Erhöhe Intuition um 30% (oder 100% für volle Intuition)
+        if (IntuitionSystem.Instance != null)
         {
-            int healthBefore = MainGameLogic.Instance.Player.getCurrentHealth();
-            if(healthBefore >= MainGameLogic.Instance.Player.getMaxHealth())
-            {
-                Debug.Log("Gesundheit ist bereits voll. Heilung nicht möglich.");
-                return;
-            }
-    
+            IntuitionSystem.Instance.IncreaseIntuition(30); // 30% Bonus
             
-            MainGameLogic.Instance.Player.setCurrentHealth(healthBefore + 1);
+            // Visuelles Feedback
+            if (VisualFeedbackManager.Instance != null && Camera.main != null)
+            {
+                Vector3 feedbackPos = Camera.main.transform.position + Camera.main.transform.forward * 2f;
+                VisualFeedbackManager.Instance.PlayItemUseEffect(feedbackPos);
+                VisualFeedbackManager.Instance.FlashScreen(Color.cyan, 0.3f, 0.2f);
+            }
         }
         else
         {
-            Debug.LogError("MainGameLogic oder Player nicht gefunden!");
+            Debug.LogError("IntuitionSystem.Instance nicht gefunden!");
         }
     }
 }

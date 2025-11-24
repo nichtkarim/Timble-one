@@ -17,6 +17,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/CupGame_additive.unity
     guid: f6fe899a0e1363e4cb3825c01d22eefe
+  - enabled: 1
+    path: Assets/Scenes/GUI.unity
+    guid: bdf992b35c5297449979b211c36eb384
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0

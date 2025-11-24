@@ -96,6 +96,12 @@ private async Task GameLoop()
         {
             Debug.Log(" Falscher Cup: " + cup.name);
             
+            // === INTUITION-VERLUST bei falschem Cup ===
+            if (IntuitionSystem.Instance != null)
+            {
+                IntuitionSystem.Instance.OnWrongCupSelected();
+            }
+            
             // Visuelles Feedback für falschen Cup
             if (VisualFeedbackManager.Instance != null)
             {
@@ -121,39 +127,99 @@ private async Task GameLoop()
         // 1. Zufällig Cup bestimmen
         correctCup = cups[Random.Range(0, cups.Length)];
         correctCup.GetComponent<Cup>().isCorrectCup = true;
-        //float newBallX = correctCup.transform.parent.position.x + correctCup.position.x;
 
         ball.position = new Vector3(correctCup.position.x, ball.position.y, ball.position.z);
-
-
-        //Debug.Log("Der ball hat koordinaten: " + ball.position);
-        //Debug.Log("Der korrekte Cup hat " + correctCup.position);
-        //ball.SetPositionAndRotation(correctCup.position + Vector3.down * 0.3f, Quaternion.identity);       
-       // Debug.Log("Der Ball ist unter dem Cup: " + correctCup.name);
-
 
         await MoveAllCupsDown(cups, -0.4f, 0.7f);
 
         ball.parent = correctCup;
       
+        // === SCHRITT 3: BALL ENTFERNUNG (VOR dem Mischen) ===
+        bool ballWasRemoved = false;
+        if (IntuitionSystem.Instance != null)
+        {
+            ballWasRemoved = IntuitionSystem.Instance.ShouldRemoveBall();
+            
+            if (ballWasRemoved)
+            {
+                Debug.Log("⚠️ DEALER HAT DEN BALL ENTFERNT! (Niedrige Intuition)");
+                // Deaktiviere den Ball visuell
+                ball.gameObject.SetActive(false);
+                
+                // Wichtig: Markiere dass KEIN Cup korrekt ist
+                correctCup.GetComponent<Cup>().isCorrectCup = false;
+                correctCup = null; // Kein korrekter Cup mehr!
+            }
+            else
+            {
+                Debug.Log("✅ Ball bleibt im Spiel (Hohe Intuition schützt)");
+            }
+        }
+        
         PlayerCanClick = false;
         await shuffleCups();
+        
+        // === SCHRITT 4: TIPP-SYSTEM (NACH dem Mischen) ===
+        if (IntuitionSystem.Instance != null && !ballWasRemoved)
+        {
+            // Nur Tipp geben wenn Ball noch im Spiel ist
+            int correctCupIndex = System.Array.IndexOf(cups, correctCup);
+            IntuitionSystem.Instance.GiveTipToPlayer(correctCupIndex);
+            
+            if (IntuitionSystem.Instance.HasTip())
+            {
+                int tipIndex = IntuitionSystem.Instance.GetTipCupIndex();
+                Debug.Log($"💡 SPIELER HAT TIPP ERHALTEN! Richtige Tasse: {cups[tipIndex].name} (Index {tipIndex})");
+                
+                // Optional: Visueller Effekt für den Tipp
+                // TODO: Hier könnte man den richtigen Cup kurz highlighten
+            }
+            else
+            {
+                Debug.Log($"❌ Kein Tipp erhalten (Intuition zu niedrig: {IntuitionSystem.Instance.getCurrentIntuition()}%)");
+            }
+        }
+        
         PlayerCanClick = true; 
         ball.parent = null;
 
         Cup chosenCup = await WaitForCupClick();
+        
+        // === Ball wieder aktivieren falls er entfernt wurde ===
+        if (ballWasRemoved)
+        {
+            ball.gameObject.SetActive(true);
+            Debug.Log("🎱 Ball wird wieder aktiviert für nächste Runde");
+        }
+        
         if (chosenCup.isCorrectCup)
         {
-        await moveUpOrDown(chosenCup.transform, 0.4f, 0.5f);
+            await moveUpOrDown(chosenCup.transform, 0.4f, 0.5f);
         }
         else
         {
             await moveUpOrDown(chosenCup.transform, 0.4f, 0.5f);
-        await moveUpOrDown(correctCup, 0.4f, 0.5f); 
+            
+            // Zeige richtigen Cup nur wenn Ball nicht entfernt wurde
+            if (correctCup != null)
+            {
+                await moveUpOrDown(correctCup, 0.4f, 0.5f);
+            }
+            else
+            {
+                Debug.Log("💀 Kein Cup war richtig - Ball wurde entfernt!");
+            }
         }
 
         Debug.Log("Auswahl erkannt → Runde vorbei");
         ResetCupPositions();
+        
+        // === SCHRITT 7: INTUITION VERLUST AM RUNDEN-ENDE ===
+        if (IntuitionSystem.Instance != null)
+        {
+            IntuitionSystem.Instance.OnRoundEnd();
+            Debug.Log($"📉 Runde beendet - Intuition jetzt: {IntuitionSystem.Instance.getCurrentIntuition()}%");
+        }
     }
 
 async Task shuffleCups()

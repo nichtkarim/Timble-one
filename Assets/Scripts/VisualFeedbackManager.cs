@@ -276,6 +276,53 @@ public class VisualFeedbackManager : MonoBehaviour
         StartCoroutine(FlashCoroutine(wrongFlashColor));
     }
 
+    /// <summary>
+    /// Screen Flash mit benutzerdefinierter Farbe, Intensität und Dauer
+    /// </summary>
+    public void FlashScreen(Color color, float intensity = 0.3f, float duration = 0.2f)
+    {
+        StartCoroutine(FlashScreenCoroutine(color, intensity, duration));
+    }
+
+    private IEnumerator FlashScreenCoroutine(Color color, float intensity, float duration)
+    {
+        if (flashOverlay == null) yield break;
+
+        UnityEngine.UI.Image image = flashOverlay.GetComponent<UnityEngine.UI.Image>();
+        if (image == null) yield break;
+
+        image.color = color;
+
+        // Fade in
+        float elapsed = 0f;
+        while (elapsed < duration / 2)
+        {
+            float alpha = Mathf.Lerp(0, intensity, elapsed / (duration / 2));
+            Color c = image.color;
+            c.a = alpha;
+            image.color = c;
+            elapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        // Fade out
+        elapsed = 0f;
+        while (elapsed < duration / 2)
+        {
+            float alpha = Mathf.Lerp(intensity, 0, elapsed / (duration / 2));
+            Color c = image.color;
+            c.a = alpha;
+            image.color = c;
+            elapsed += Time.unscaledDeltaTime;
+            yield return null;
+        }
+
+        // Stelle sicher dass Alpha 0 ist
+        Color finalColor = image.color;
+        finalColor.a = 0;
+        image.color = finalColor;
+    }
+
     private IEnumerator FlashCoroutine(Color color)
     {
         if (flashOverlay == null) yield break;
