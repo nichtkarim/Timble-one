@@ -4,9 +4,7 @@ using UnityEngine;
 [System.Serializable]
 public class SlowDownItem : GameItem
 {
-    public string itemName;
-    public Sprite icon;
-    public string description;
+    // itemName, icon, description werden von GameItem geerbt - NICHT hier definieren!
 
     // Beispiel: Item-Effekt ausführen
     

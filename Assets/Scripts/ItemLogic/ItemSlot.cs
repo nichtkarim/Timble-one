@@ -26,7 +26,7 @@ public class ItemSlot : MonoBehaviour, IClickable, IHoverable
 
         if (currentItem != null && currentItem.itemPrefab != null)
         {
-            Debug.Log($"Spawne {currentItem.itemName} in Slot {slotIndex}");
+            Debug.Log($"✅ Spawne '{currentItem.itemName}' (Description: '{currentItem.description}') in Slot {slotIndex}");
             visualInstance = Instantiate(
                 currentItem.itemPrefab, 
                 transform.position, 
@@ -42,7 +42,14 @@ public class ItemSlot : MonoBehaviour, IClickable, IHoverable
         }
         else
         {
-            Debug.LogError($"Item oder Prefab ist null für Slot {slotIndex}");
+            if (currentItem == null)
+            {
+                Debug.LogError($"❌ Item ist NULL für Slot {slotIndex}");
+            }
+            else if (currentItem.itemPrefab == null)
+            {
+                Debug.LogError($"❌ Item Prefab ist NULL für '{currentItem.itemName}' in Slot {slotIndex}");
+            }
         }
     }
     
@@ -128,12 +135,23 @@ public class ItemSlot : MonoBehaviour, IClickable, IHoverable
     public void OnHoverEnter()
     {
         if (!MainGameLogic.PlayerCanClick) return;
-        if (currentItem == null) return;
+        if (currentItem == null)
+        {
+            Debug.LogWarning($"Slot {slotIndex}: currentItem ist NULL!");
+            return;
+        }
+
+        // Debug: Zeige Item-Info
+        Debug.Log($"Hover über Slot {slotIndex}: Item={currentItem.itemName}, Description={currentItem.description}");
 
         // Zeige Tooltip
         if (TooltipSystem.Instance != null)
         {
             TooltipSystem.Instance.ShowTooltip(currentItem.itemName, currentItem.description);
+        }
+        else
+        {
+            Debug.LogError("TooltipSystem.Instance ist NULL!");
         }
 
         // Füge Outline zum Slot hinzu

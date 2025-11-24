@@ -9,7 +9,9 @@ public class FirstPersonController : MonoBehaviour
     public float sprintSpeed = 8f;
     public float crouchSpeed = 2.5f;
     public float jumpHeight = 1.5f;
-    public float gravity = -9.81f;
+    public float gravity = -19.62f; // Erhöhte Gravitation für besseres Gefühl
+    public float slopeForce = 8f; // Kraft um auf Slopes zu bleiben
+    public float slopeForceRayLength = 2f;
     
     [Header("Head Bob Settings")]
     public bool enableHeadBob = true;
@@ -44,11 +46,34 @@ public class FirstPersonController : MonoBehaviour
     {
         characterController = GetComponent<CharacterController>();
         
+        // CharacterController Setup prüfen
+        if (characterController != null)
+        {
+            // Stelle sicher dass die Werte korrekt sind
+            characterController.height = 2f;
+            characterController.radius = 0.5f;
+            characterController.center = new Vector3(0, 1, 0);
+            
+            Debug.Log("✅ CharacterController: Height=" + characterController.height + ", Radius=" + characterController.radius + ", Center=" + characterController.center);
+        }
+        else
+        {
+            Debug.LogError("❌ KEIN CHARACTER CONTROLLER GEFUNDEN!");
+        }
+        
+        // Prüfe Gravity-Wert
+        if (Mathf.Abs(gravity) < 1f)
+        {
+            Debug.LogError("❌ GRAVITY IST 0 ODER ZU KLEIN! Aktuell: " + gravity + " - Setze auf -19.62");
+            gravity = -19.62f;
+        }
+        
         // Cursor verstecken und im Spiel sperren
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         
         Debug.Log("=== FIRSTPERSON CONTROLLER START ===");
+        Debug.Log("Gravity: " + gravity);
         Debug.Log("CameraTransform zugewiesen? " + (cameraTransform != null));
         
         // Speichere Original-Position der Kamera und setze Rotation zurück
@@ -59,8 +84,6 @@ public class FirstPersonController : MonoBehaviour
             cameraTransform.localRotation = Quaternion.identity;
             cameraPitch = 0f;
             Debug.Log("✅ Kamera gefunden: " + cameraTransform.name);
-            Debug.Log("Kamera Position: " + cameraTransform.localPosition);
-            Debug.Log("Kamera Parent: " + (cameraTransform.parent != null ? cameraTransform.parent.name : "KEIN PARENT"));
         }
         else
         {
@@ -91,11 +114,35 @@ public class FirstPersonController : MonoBehaviour
 
     void HandleMovement()
     {
-        // Ground Check
-        isGrounded = characterController.isGrounded;
+        // Verbesserter Ground Check - nur am Boden wenn wirklich am Boden
+        isGrounded = false;
+        
+        // Raycast nach unten vom Center des Controllers
+        RaycastHit groundHit;
+        float rayDistance = (characterController.height / 2f) + 0.1f;
+        Vector3 rayOrigin = transform.position + characterController.center;
+        
+        if (Physics.Raycast(rayOrigin, Vector3.down, out groundHit, rayDistance))
+        {
+            isGrounded = true;
+        }
+        
+        // Zusätzlicher Check mit CharacterController.isGrounded
+        if (characterController.isGrounded)
+        {
+            isGrounded = true;
+        }
+        
+        // DEBUG
+        if (Time.frameCount % 60 == 0) // Jede Sekunde
+        {
+            Debug.Log("🌍 isGrounded: " + isGrounded + " | velocity.y: " + velocity.y + " | Position.y: " + transform.position.y);
+        }
+        
+        // Nur velocity zurücksetzen wenn WIRKLICH am Boden
         if (isGrounded && velocity.y < 0)
         {
-            velocity.y = -2f;
+            velocity.y = -2f; // Kleine negative Kraft um am Boden zu bleiben
         }
 
         // Input lesen
@@ -115,24 +162,59 @@ public class FirstPersonController : MonoBehaviour
         {
             currentSpeed = crouchSpeed;
         }
-        else if (sprintInput && moveInput.y > 0) // Nur beim Vorwärtslaufen sprinten
+        else if (sprintInput && moveInput.y > 0)
         {
             currentSpeed = sprintSpeed;
         }
 
         // Bewegung berechnen - relativ zur Blickrichtung
         Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
+        
+        // Normalisiere Bewegung um diagonale Geschwindigkeit zu verhindern
+        if (move.magnitude > 1f)
+        {
+            move.Normalize();
+        }
+        
         characterController.Move(move * currentSpeed * Time.deltaTime);
+
+        // Slope Force - drückt Spieler nach unten auf Slopes
+        if (isGrounded && move.magnitude > 0.1f)
+        {
+            RaycastHit slopeHit;
+            Vector3 slopeRayOrigin = transform.position + characterController.center;
+            if (Physics.Raycast(slopeRayOrigin, Vector3.down, out slopeHit, slopeForceRayLength))
+            {
+                if (slopeHit.normal != Vector3.up)
+                {
+                    // Wende zusätzliche Kraft nach unten an auf Slopes
+                    characterController.Move(Vector3.down * slopeForce * Time.deltaTime);
+                }
+            }
+        }
 
         // Springen
         if (jumpInput && isGrounded)
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            Debug.Log("🦘 SPRUNG! velocity.y = " + velocity.y);
         }
 
-        // Schwerkraft anwenden
-        velocity.y += gravity * Time.deltaTime;
-        characterController.Move(velocity * Time.deltaTime);
+        // Schwerkraft IMMER anwenden - auch wenn am Boden!
+        if (!isGrounded || velocity.y > 0) // Nur wenn in der Luft oder nach oben springt
+        {
+            velocity.y += gravity * Time.deltaTime;
+        }
+        
+        // DEBUG - Zeige velocity vor Move
+        if (Time.frameCount % 60 == 0)
+        {
+            Debug.Log("📉 Applying vertical velocity: " + velocity.y + " | Move: " + (velocity * Time.deltaTime));
+        }
+        
+        // Vertikale Bewegung anwenden
+        Vector3 verticalMove = new Vector3(0, velocity.y, 0) * Time.deltaTime;
+        characterController.Move(verticalMove);
     }
 
     void HandleLook()
